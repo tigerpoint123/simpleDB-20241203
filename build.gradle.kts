@@ -22,6 +22,8 @@ dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2")
+    implementation ("org.slf4j:slf4j-api:2.0.3") // SLF4J API
+    implementation ("ch.qos.logback:logback-classic:1.2.11")// Logback 구현체
 }
 
 tasks.test {

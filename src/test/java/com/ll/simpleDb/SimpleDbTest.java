@@ -1,6 +1,6 @@
 package com.ll.simpleDb;
 
-import com.ll.Article;
+import org.example.SimpleDb;
 import org.junit.jupiter.api.*;
 
 import java.time.LocalDateTime;
@@ -24,33 +24,39 @@ public class SimpleDbTest {
     @BeforeAll
     public static void beforeAll() {
         simpleDb = new SimpleDb("localhost", "root", "lldj123414", "simpleDb__test");
-        simpleDb.setDevMode(true);
+//        simpleDb.setDevMode(true);
 
         createArticleTable();
     }
 
-    @BeforeEach
-    public void beforeEach() {
-        truncateArticleTable();
-        makeArticleTestData();
+//    @BeforeEach
+//    public void beforeEach() {
+//        truncateArticleTable();
+//        makeArticleTestData();
+//    }
+
+    private static void createArticleTable() {
+        simpleDb.run("DROP TABLE IF EXISTS article");
+
+        simpleDb.run("""
+                CREATE TABLE article (
+                    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                    PRIMARY KEY(id),
+                    createdDate DATETIME NOT NULL,
+                    modifiedDate DATETIME NOT NULL,
+                    title VARCHAR(100) NOT NULL,
+                    `body` TEXT NOT NULL,
+                    isBlind BIT(1) NOT NULL DEFAULT 0
+                )
+                """);
     }
 
-//    private static void createArticleTable() {
-//        simpleDb.run("DROP TABLE IF EXISTS article");
-//
-//        simpleDb.run("""
-//                CREATE TABLE article (
-//                    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-//                    PRIMARY KEY(id),
-//                    createdDate DATETIME NOT NULL,
-//                    modifiedDate DATETIME NOT NULL,
-//                    title VARCHAR(100) NOT NULL,
-//                    `body` TEXT NOT NULL,
-//                    isBlind BIT(1) NOT NULL DEFAULT 0
-//                )
-//                """);
-//    }
-//
+    @Test
+    @DisplayName("데이터베이스 연결 테스트")
+    public void t00() {
+
+    }
+
 //    private void makeArticleTestData() {
 //        IntStream.rangeClosed(1, 6).forEach(no -> {
 //            boolean isBlind = no > 3;
