@@ -1,5 +1,8 @@
 package org.example;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Sql {
+    private static final Logger log = LoggerFactory.getLogger(Sql.class); // 로그 객체 생성
     private StringBuilder sql = new StringBuilder();
     private Connection connection; // simpleDb에서 가져온 연결 객체
     private Map<String, Object> parameters = new LinkedHashMap<>();
@@ -34,36 +38,42 @@ public class Sql {
 
 
     // SQL 문 실행 및 생성된 ID 반환
-    public long insert() throws SQLException {
-        PreparedStatement pstmt = connection.prepareStatement(sql.toString(), PreparedStatement.RETURN_GENERATED_KEYS);
-        // ? placeholder에 값 설정 (append에서 추가된 순서대로)
-        // ... (PreparedStatement의 setXXX 메서드를 사용하여 값 설정)
+    public long insert() {
+        try (PreparedStatement pstmt = connection.prepareStatement(sql.toString(), PreparedStatement.RETURN_GENERATED_KEYS)) {
+            // ? placeholder에 값 설정 (append에서 추가된 순서대로)
+            // ... (PreparedStatement의 setXXX 메서드를 사용하여 값 설정)
 
-        // placeholder에 값 바인딩
-        int index = 1;
-        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
-            Object value = entry.getValue();
-            if (value instanceof String) {
-                pstmt.setString(index++, (String) value);
-            } else if (value instanceof Integer) {
-                pstmt.setInt(index++, (Integer) value);
-            } else {
-                // 다른 데이터 타입에 대한 처리 추가
-                pstmt.setObject(index++, value);
+            // placeholder에 값 바인딩
+            int index = 1;
+            for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+                Object value = entry.getValue();
+                if (value instanceof String) {
+                    pstmt.setString(index++, (String) value);
+                } else if (value instanceof Integer) {
+                    pstmt.setInt(index++, (Integer) value);
+                } else {
+                    // 다른 데이터 타입에 대한 처리 추가
+                    pstmt.setObject(index++, value);
+                }
             }
-        }
 
-        int affectedRows = pstmt.executeUpdate();
-        if (affectedRows == 0) {
-            throw new SQLException("No rows affected");
-        }
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("No rows affected");
+            }
 
-        // 생성된 ID 가져오기
-        ResultSet generatedKeys = pstmt.getGeneratedKeys();
-        if (generatedKeys.next()) {
-            return generatedKeys.getLong(1);
-        } else {
-            throw new SQLException("No ID obtained.");
+            // 생성된 ID 가져오기
+            ResultSet generatedKeys = pstmt.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                return generatedKeys.getLong(1);
+            } else {
+                throw new SQLException("No ID obtained.");
+            }
+        } catch (SQLException e) {
+            // 예외 발생 시 처리 로직
+            log.error("SQL 실행 실패: {}", sql, e);
+            // 예외를 던지거나, -1을 반환하거나, 다른 적절한 처리를 수행
+            throw new RuntimeException("SQL 실행 중 예외 발생", e);
         }
     }
 }

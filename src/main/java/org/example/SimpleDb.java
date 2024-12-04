@@ -37,11 +37,18 @@ public class SimpleDb {
         return DriverManager.getConnection(url, username, password); // 연결 객체 반환
     }
 
-    public Sql genSql() throws SQLException {
-        // simpleDb를 통해 데이터베이스 연결 가져오기
-        Connection connection = getConnection();
+    public Sql genSql() {
+        try {
+            // simpleDb를 통해 데이터베이스 연결 가져오기
+            Connection connection = getConnection();
 
-        // Sql 객체 생성 및 반환
-        return new Sql(connection);
+            // Sql 객체 생성 및 반환
+            return new Sql(connection);
+        } catch (SQLException e) {
+            // 예외 발생 시 처리 로직
+            log.error("데이터베이스 연결 실패", e);
+            // 예외를 던지거나, null을 반환하거나, 다른 적절한 처리를 수행
+            throw new RuntimeException("데이터베이스 연결 실패", e);
+        }
     }
 }

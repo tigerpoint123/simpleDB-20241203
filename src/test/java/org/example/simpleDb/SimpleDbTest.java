@@ -71,7 +71,7 @@ public class SimpleDbTest {
 
     @Test
     @DisplayName("insert")
-    public void t001() throws SQLException {
+    public void t001() {
         Sql sql = simpleDb.genSql();
         /*
         == rawSql ==
