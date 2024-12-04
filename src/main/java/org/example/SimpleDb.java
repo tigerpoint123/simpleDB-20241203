@@ -23,7 +23,7 @@ public class SimpleDb {
         try (Connection connection = getConnection(); // 데이터베이스 연결 객체
              PreparedStatement pstmt = connection.prepareStatement(sql)) { // sql문을 전달받고 이를 기반으로 객체를 생성. PreparedStatement는 sql 삽입 공격을 방지하고 성능을 향상
             for (int i = 0; i < args.length; i++) {
-                pstmt.setObject(i + 1, args[i]);
+                pstmt.setObject(i + 1, args[i]); // 왜 + 1 이냐. jdbc 표준에 정의된 규약. 첫 번째 ?의 인덱스는 1, 두번째는 2...
             }
             pstmt.executeUpdate(); // insert update delete 등 실행
             log.info("SQL 실행 성공: {}", sql);
@@ -37,4 +37,11 @@ public class SimpleDb {
         return DriverManager.getConnection(url, username, password); // 연결 객체 반환
     }
 
+    public Sql genSql() throws SQLException {
+        // simpleDb를 통해 데이터베이스 연결 가져오기
+        Connection connection = getConnection();
+
+        // Sql 객체 생성 및 반환
+        return new Sql(connection);
+    }
 }
