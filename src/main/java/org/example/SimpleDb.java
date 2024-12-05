@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory; // 로그를 생성하는 클래스
 import java.sql.DriverManager; // JDBC 드라이버 관리 클래스
 import java.sql.SQLException; // SQL 관련 예외 클래스
 
+
 @RequiredArgsConstructor // 생성자 자동 생성 어노테이션
 public class SimpleDb {
     private static final Logger log = LoggerFactory.getLogger(SimpleDb.class); // 로그 객체 생성
@@ -38,17 +39,69 @@ public class SimpleDb {
     }
 
     public Sql genSql() {
-        try {
-            // simpleDb를 통해 데이터베이스 연결 가져오기
-            Connection connection = getConnection();
-
-            // Sql 객체 생성 및 반환
-            return new Sql(connection);
-        } catch (SQLException e) {
-            // 예외 발생 시 처리 로직
-            log.error("데이터베이스 연결 실패", e);
-            // 예외를 던지거나, null을 반환하거나, 다른 적절한 처리를 수행
-            throw new RuntimeException("데이터베이스 연결 실패", e);
-        }
+        return new Sql(this);
     }
+
+    public Boolean selectBoolean(StringBuilder sqlFormat) {
+        boolean result = false;
+        try (Connection connection = getConnection(); // 데이터베이스 연결 객체
+             PreparedStatement pstmt = connection.prepareStatement(sqlFormat.toString())) { // sql문을 전달받고 이를 기반으로 객체를 생성. PreparedStatement는 sql 삽입 공격을 방지하고 성능을 향상
+
+            ResultSet resultSet = pstmt.executeQuery();
+            if (resultSet.next()) {
+                result = resultSet.getBoolean(1);
+            }
+
+        } catch (SQLException e) {
+        }
+
+        return result;
+    }
+
+    public String selectString(StringBuilder sqlFormat) {
+
+
+        return null;
+    }
+
+//    public long insert(String sql) {
+//        try (PreparedStatement pstmt = getConnection().prepareStatement(sql.toString(), PreparedStatement.RETURN_GENERATED_KEYS)) {
+//            // ? placeholder에 값 설정 (append에서 추가된 순서대로)
+//            // ... (PreparedStatement의 setXXX 메서드를 사용하여 값 설정)
+//
+//            pstmt.executeUpdate();
+//
+//            // placeholder에 값 바인딩
+////            int index = 1;
+////            for (Map.Entry<String, Object> entry : args.entrySet()) {
+////                Object value = entry.getValue();
+////                if (value instanceof String) {
+////                    pstmt.setString(index++, (String) value);
+////                } else if (value instanceof Integer) {
+////                    pstmt.setInt(index++, (Integer) value);
+////                } else {
+////                    // 다른 데이터 타입에 대한 처리 추가
+////                    pstmt.setObject(index++, value);
+////                }
+////            }
+////
+////            int affectedRows = pstmt.executeUpdate();
+////            if (affectedRows == 0) {
+////                throw new SQLException("No rows affected");
+////            }
+////
+////            // 생성된 ID 가져오기
+//            ResultSet generatedKeys = pstmt.getGeneratedKeys();
+//            if (generatedKeys.next()) {
+//                return generatedKeys.getLong(1);
+//            } else {
+//                throw new SQLException("No ID obtained.");
+//            }
+//        } catch (SQLException e) {
+//            // 예외 발생 시 처리 로직
+////            log.error("SQL 실행 실패: {}", sql, e);
+//            // 예외를 던지거나, -1을 반환하거나, 다른 적절한 처리를 수행
+//            throw new RuntimeException("SQL 실행 중 예외 발생", e);
+//        }
+//    }
 }
